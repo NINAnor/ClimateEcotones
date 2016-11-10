@@ -25,29 +25,21 @@ done
 for b in 01 02 03 04 05 06 07 10 11
 do
 # Compute within-pixel variation between 250m EuroLST and 1km SeNorge data
-r.resamp.stats --o --v input=eurolst_clim.bio${b}@g_Meteorology_Fenoscandia_EuroLST_BIOCLIM output=eurolst_clim.bio${b}_1km_min method=minimum
-r.resamp.stats --o --v input=eurolst_clim.bio${b}@g_Meteorology_Fenoscandia_EuroLST_BIOCLIM output=eurolst_clim.bio${b}_1km_max method=maximum
-r.resamp.stats --o --v input=eurolst_clim.bio${b}@g_Meteorology_Fenoscandia_EuroLST_BIOCLIM output=eurolst_clim.bio${b}_1km_mean method=average
-r.resamp.stats --o --v input=eurolst_clim.bio${b}@g_Meteorology_Fenoscandia_EuroLST_BIOCLIM output=eurolst_clim.bio${b}_1km_stddev method=stddev
-r.resamp.stats --o --v input=eurolst_clim.bio${b}@g_Meteorology_Fenoscandia_EuroLST_BIOCLIM output=eurolst_clim.bio${b}_1km_var method=variance
+r.resamp.stats --o --v -w input=eurolst_clim.bio${b}@g_Meteorology_Fenoscandia_EuroLST_BIOCLIM output=eurolst_clim.bio${b}_1km_min method=minimum
+r.resamp.stats --o --v -w input=eurolst_clim.bio${b}@g_Meteorology_Fenoscandia_EuroLST_BIOCLIM output=eurolst_clim.bio${b}_1km_max method=maximum
+r.resamp.stats --o --v -w input=eurolst_clim.bio${b}@g_Meteorology_Fenoscandia_EuroLST_BIOCLIM output=eurolst_clim.bio${b}_1km_mean method=average
+r.resamp.stats --o --v -w input=eurolst_clim.bio${b}@g_Meteorology_Fenoscandia_EuroLST_BIOCLIM output=eurolst_clim.bio${b}_1km_stddev method=stddev
+r.resamp.stats --o --v -w input=eurolst_clim.bio${b}@g_Meteorology_Fenoscandia_EuroLST_BIOCLIM output=eurolst_clim.bio${b}_1km_var method=variance
 r.mapcalc --o --v expression="eurolst_clim.bio${b}_1km_range=eurolst_clim.bio${b}_1km_max - eurolst_clim.bio${b}_1km_min"
-done
-
-
-# Calculate differences between EuroLST and SeNorge for bioclim variables
-for b in 01 02 03 04 05 06 07 10 11
-do
+### Calculate differences between EuroLST and SeNorge for bioclim variables
 # Compute difference between 250m EuroLST aggregated to 1km and 1km SeNorge data
-r.mapcalc --o --v expression="eurolst_SeNorge_bio${b}_1km_difference=eurolst_clim.bio${b}_1km_mean - temperature_seNorge_1km_bioclim_bio${b}_2001_2010_mean"
+r.mapcalc --o --v expression="eurolst_SeNorge_bio${b}_1km_difference=float(float(eurolst_clim.bio${b}_1km_mean) - float(temperature_seNorge_1km_bioclim_bio${b}_2001_2010_mean))/10.0"
 # Compute differen1km SeNorge data and 1km WorldClim
 #r.mapcalc --o --v expression="SeNorge_WorldClim_bio${b}_1km_difference=temperature_seNorge_1km_bioclim_bio${b}_2001_2010_mean - WorldClim_current_bio05_1975@g_Meteorology_Fenoscandia_WorldClim_current"
 
 # Set color table to "differences"
 r.colors map=eurolst_SeNorge_bio${b}_1km_difference color=differences
-done
 
-for b in 01 02 03 04 05 06 07 10 11
-do
 # Get title of bioclim variable
 if [ "bio${b}" == "bio01" ] ; then 
 var="Annual Mean Temperature"
@@ -78,7 +70,7 @@ d.mon --o start=cairo output=$HOME/Prosjekter/Climate\ Ecotones/WP1/ClimateDataC
 d.rast map=eurolst_SeNorge_bio${b}_1km_difference
 d.text -p -s text="Difference between EuroLST (E) and SeNorge (S) (E-S)" color=black linespacing=1 at=5,25 font=arialbd size=12
 d.text -p -s text="BIO${b}: $var" color=black linespacing=1 at=5,45 font=arialbd size=12
-d.legend -d raster=eurolst_SeNorge_bio${b}_1km_difference title="Temperature difference" title_fontsize=14 lines=1 units=" C/10" at=5,50,10,12.5 font=Arial fontsize=12
+d.legend -d raster=eurolst_SeNorge_bio${b}_1km_difference title="Temperature difference" title_fontsize=14 lines=1 units=" C" at=5,50,10,12.5 font=Arial fontsize=12
 d.barscale at=50.0,10.0 length=500 units=kilometers segment=9
 d.northarrow at=85.0,15.0 fontsize=12
 d.mon stop=cairo
