@@ -76,3 +76,63 @@ d.northarrow at=85.0,15.0 fontsize=12
 d.mon stop=cairo
 done
 
+### Extract relevant coordinates for raw measurement data comparison
+coords=$(psql -q -t -A -F ' ' -d gisdata -c 'SELECT * FROM (SELECT DISTINCT ON (geom) ST_X(ST_Transform(geom, 3035)) AS X, ST_Y(ST_Transform(geom, 3035)) AS Y, stnr
+  FROM "Meteorology"."metnoStations") AS x ORDER BY CAST(stnr AS integer);')
+echo "$coords" | r.what --overwrite --verbose map=eurolst_clim.bio01@EuroLST_BIOCLIM | grep -v '\*' | cut -f1-3 -d'|' | tr '|' ' ' > $HOME/Prosjekter/Climate\ Ecotones/WP1/ClimateDataComparison/metno_stations.csv
+
+psql -q -t -A -F ' ' -d gisdata -c "SELECT * FROM (SELECT DISTINCT ON (x,y) * FROM (SELECT DISTINCT ON (geom) ST_X(ST_Transform(geom, 3035)) AS X, ST_Y(ST_Transform(geom, 3035)) AS Y, CAST('temp_' || gid AS varchar(15)) AS id
+  FROM sentinel4nature.\"temperaturelogger_locations_Nina_Eide\") AS a
+UNION ALL 
+SELECT * FROM (SELECT DISTINCT ON (geom) ST_X(ST_Transform(geom, 3035)) AS X, ST_Y(ST_Transform(geom, 3035)) AS Y, CAST('ce_gps_' || gid AS varchar(15)) AS id
+  FROM ecotones.ce_gps_waypoints_2016) AS b
+UNION ALL 
+SELECT * FROM (SELECT DISTINCT ON (geom) ST_X(ST_Transform(geom, 3035)) AS X, ST_Y(ST_Transform(geom, 3035)) AS Y, CAST('hjerk_gps_' || gid AS varchar(15)) AS id
+  FROM ecotones.hjerkin_sip_gps_waypoints_2016) AS c
+UNION ALL 
+SELECT * FROM (SELECT DISTINCT ON (geom) ST_X(ST_Transform(geom, 3035)) AS X, ST_Y(ST_Transform(geom, 3035)) AS Y, \"ID\" AS id
+  FROM ecotones.veipunkter) AS d 
+UNION ALL 
+SELECT * FROM (SELECT DISTINCT ON (geom) ST_X(ST_Transform(geom, 3035)) AS X, ST_Y(ST_Transform(geom, 3035)) AS Y, CAST('trans_' || id AS varchar(15)) AS id
+  FROM ecotones.transekter) AS e 
+UNION ALL 
+SELECT * FROM (SELECT DISTINCT ON (geom) ST_X(ST_Transform(geom, 3035)) AS X, ST_Y(ST_Transform(geom, 3035)) AS Y, CAST('bil_squ_' || id AS varchar(15)) AS id
+  FROM ecotones.bilberry_squares_2016) AS f 
+UNION ALL 
+SELECT * FROM (SELECT DISTINCT ON (geom) ST_X(ST_Transform(geom, 3035)) AS X, ST_Y(ST_Transform(geom, 3035)) AS Y, CAST('bil_sept_' || id AS varchar(15)) AS id
+  FROM ecotones.bilberry_sept_2016) AS g
+) AS x ORDER BY id;" > $HOME/Prosjekter/Climate\ Ecotones/WP1/ClimateDataComparison/templogger.csv
+
+
+g.region -p raster=EuroLST_2010_01_avg@gt_Meteorology_Fenoscandia_EuroLST_month align=EuroLST_2010_01_avg@gt_Meteorology_Fenoscandia_EuroLST_month
+### Extract relevant coordinates for raw measurement data comparison
+coords=$(psql -q -t -A -F ' ' -d gisdata -c 'SELECT * FROM (SELECT DISTINCT ON (geom) ST_X(ST_Transform(geom, 25833)) AS X, ST_Y(ST_Transform(geom, 25833)) AS Y, stnr
+  FROM "Meteorology"."metnoStations") AS x ORDER BY CAST(stnr AS integer);')
+echo "$coords" | r.what --overwrite --verbose map=EuroLST_2010_01_avg@gt_Meteorology_Fenoscandia_EuroLST_month | grep -v '\*' | cut -f1-3 -d'|' | tr '|' ' ' > $HOME/Prosjekter/Climate\ Ecotones/WP1/ClimateDataComparison/metno_stations_utm33.csv
+
+psql -q -t -A -F ' ' -d gisdata -c "SELECT * FROM (SELECT DISTINCT ON (x,y) * FROM (SELECT DISTINCT ON (geom) ST_X(ST_Transform(geom, 25833)) AS X, ST_Y(ST_Transform(geom, 25833)) AS Y, CAST('temp_' || gid AS varchar(15)) AS id
+  FROM sentinel4nature.\"temperaturelogger_locations_Nina_Eide\") AS a
+UNION ALL 
+SELECT * FROM (SELECT DISTINCT ON (geom) ST_X(ST_Transform(geom, 25833)) AS X, ST_Y(ST_Transform(geom, 25833)) AS Y, CAST('ce_gps_' || gid AS varchar(15)) AS id
+  FROM ecotones.ce_gps_waypoints_2016) AS b
+UNION ALL 
+SELECT * FROM (SELECT DISTINCT ON (geom) ST_X(ST_Transform(geom, 25833)) AS X, ST_Y(ST_Transform(geom, 25833)) AS Y, CAST('hjerk_gps_' || gid AS varchar(15)) AS id
+  FROM ecotones.hjerkin_sip_gps_waypoints_2016) AS c
+UNION ALL 
+SELECT * FROM (SELECT DISTINCT ON (geom) ST_X(ST_Transform(geom, 25833)) AS X, ST_Y(ST_Transform(geom, 25833)) AS Y, \"ID\" AS id
+  FROM ecotones.veipunkter) AS d 
+UNION ALL 
+SELECT * FROM (SELECT DISTINCT ON (geom) ST_X(ST_Transform(geom, 25833)) AS X, ST_Y(ST_Transform(geom, 25833)) AS Y, CAST('trans_' || id AS varchar(15)) AS id
+  FROM ecotones.transekter) AS e 
+UNION ALL 
+SELECT * FROM (SELECT DISTINCT ON (geom) ST_X(ST_Transform(geom, 25833)) AS X, ST_Y(ST_Transform(geom, 25833)) AS Y, CAST('bil_squ_' || id AS varchar(15)) AS id
+  FROM ecotones.bilberry_squares_2016) AS f 
+UNION ALL 
+SELECT * FROM (SELECT DISTINCT ON (geom) ST_X(ST_Transform(geom, 25833)) AS X, ST_Y(ST_Transform(geom, 25833)) AS Y, CAST('bil_sept_' || id AS varchar(15)) AS id
+  FROM ecotones.bilberry_sept_2016) AS g
+) AS x ORDER BY id;" > $HOME/Prosjekter/Climate\ Ecotones/WP1/ClimateDataComparison/templogger_utm33.csv
+
+cat $HOME/Prosjekter/Climate\ Ecotones/WP1/ClimateDataComparison/templogger_utm33.csv | t.rast.what -i strds=Fenoscandia_EuroLST_months_avg@gt_Meteorology_Fenoscandia_EuroLST_month > $HOME/Prosjekter/Climate\ Ecotones/WP1/ClimateDataComparison/templogger_utm33_EuroLST_month.csv
+
+cat $HOME/Prosjekter/Climate\ Ecotones/WP1/ClimateDataComparison/metno_stations_utm33.csv | t.rast.what -i strds=Fenoscandia_EuroLST_months_avg@gt_Meteorology_Fenoscandia_EuroLST_month > $HOME/Prosjekter/Climate\ Ecotones/WP1/ClimateDataComparison/metno_stations_utm33_EuroLST_month.csv
+
