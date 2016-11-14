@@ -136,3 +136,21 @@ cat $HOME/Prosjekter/Climate\ Ecotones/WP1/ClimateDataComparison/templogger_utm3
 
 cat $HOME/Prosjekter/Climate\ Ecotones/WP1/ClimateDataComparison/metno_stations_utm33.csv | t.rast.what -i strds=Fenoscandia_EuroLST_months_avg@gt_Meteorology_Fenoscandia_EuroLST_month > $HOME/Prosjekter/Climate\ Ecotones/WP1/ClimateDataComparison/metno_stations_utm33_EuroLST_month.csv
 
+g.region -p raster=temperature_seNorge_1km_months_mean_2013_11@gt_Meteorology_Norway_seNorge_temperature_months align=temperature_seNorge_1km_months_mean_2013_11@gt_Meteorology_Norway_seNorge_temperature_months
+
+cat $HOME/Prosjekter/Climate\ Ecotones/WP1/ClimateDataComparison/templogger_utm33.csv | t.rast.what -i strds=temperature_seNorge_1km_months_mean@gt_Meteorology_Norway_seNorge_temperature_months > $HOME/Prosjekter/Climate\ Ecotones/WP1/ClimateDataComparison/templogger_utm33_SeNorge_month.csv
+
+cat $HOME/Prosjekter/Climate\ Ecotones/WP1/ClimateDataComparison/metno_stations_utm33.csv | t.rast.what -i strds=temperature_seNorge_1km_months_mean@gt_Meteorology_Norway_seNorge_temperature_months > $HOME/Prosjekter/Climate\ Ecotones/WP1/ClimateDataComparison/metno_stations_utm33_SeNorge_month.csv
+
+Blacklist species
+Acer pseudoplatanus - Platanlønn
+Arion vulgaris - Brunskogsnegl
+Impatiens glandulifera - Kjempespringfrø
+varmeskye arter
+Viola biflora  Fjellfiol
+Veronica alpina - snøveronika
+Vanlige arter og skoggrense
+Vaccinium myrtillus - Blåbær
+
+v.in.pygbif -i taxa="Acer pseudoplatanus,Arion vulgaris,Impatiens glandulifera,Viola biflora,Veronica alpina,Vaccinium myrtillus" output=ClimateEcotones
+
